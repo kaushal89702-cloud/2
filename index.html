@@ -586,7 +586,7 @@ html[data-theme="light"] .theme-toggle-thumb .icon-sun{display:block;}
    One of the most visible glass components on the site — a richer
    blur, a soft dual-color glow on focus, and refined result rows.
    ---------------------------------------------------------------- */
-.search-wrap{position:relative;max-width:540px;margin:0 auto 44px;animation:fadeUp .6s var(--ease) .2s both;}
+.search-wrap{position:relative;max-width:540px;margin:0 auto 44px;animation:fadeUp .6s var(--ease) .2s both;z-index:100;}
 .search-bar{
   display:flex;align-items:center;gap:10px;padding:7px 7px 7px 20px;border-radius:999px;
   background:var(--glass-strong);border:1px solid var(--border);
@@ -605,7 +605,7 @@ html[data-theme="light"] .theme-toggle-thumb .icon-sun{display:block;}
 .search-bar input::placeholder{color:var(--text-faint);}
 .search-bar .btn{flex-shrink:0;}
 #searchResults{
-  position:absolute;top:calc(100% + 12px);left:0;right:0;z-index:50;
+  position:absolute;top:calc(100% + 12px);left:0;right:0;z-index:500;
   max-height:420px;overflow-y:auto;text-align:left;
   border-radius:var(--radius);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);
   transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
