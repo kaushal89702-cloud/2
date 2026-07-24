@@ -175,7 +175,7 @@ html[data-theme="light"] .legal-chip{background:rgba(255,255,255,0.85);border-co
 html[data-theme="light"] .tool-icon{background:rgba(59,130,246,0.08);border-color:rgba(20,22,40,0.1);}
 html[data-theme="light"] .floater{background:rgba(255,255,255,0.85);border-color:rgba(20,22,40,0.1);}
 html[data-theme="light"] .search-bar{background:rgba(255,255,255,0.9);border-color:rgba(20,22,40,0.12);}
-html[data-theme="light"] #searchResults{background:rgba(255,255,255,0.95);border-color:rgba(20,22,40,0.12);}
+html[data-theme="light"] #searchResults{background:rgba(255,255,255,0.98);border-color:rgba(20,22,40,0.14);box-shadow:0 10px 40px rgba(30,34,60,0.15);}
 html[data-theme="light"] .pdf-dropzone,
 html[data-theme="light"] .img-dropzone{background:rgba(255,255,255,0.7);border-color:rgba(20,22,40,0.18);}
 html[data-theme="light"] .pdf-file-card{background:rgba(255,255,255,0.85);border-color:rgba(20,22,40,0.1);}
@@ -606,7 +606,7 @@ html[data-theme="light"] .theme-toggle-thumb .icon-sun{display:block;}
 .search-bar .btn{flex-shrink:0;}
 #searchResults{
   position:absolute;top:calc(100% + 12px);left:0;right:0;z-index:9000;
-  max-height:420px;overflow-y:auto;text-align:left;
+  max-height:60vh;overflow-y:auto;text-align:left;
   border-radius:var(--radius);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);
   transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
   padding:10px;
@@ -2252,7 +2252,7 @@ function runSearch(query){
     item.title.toLowerCase().includes(q) ||
     item.desc.toLowerCase().includes(q) ||
     item.cat.toLowerCase().includes(q)
-  ).slice(0, 8);
+  ).slice(0, 30);
 
   if(matches.length === 0){
     searchResults.innerHTML = `<div class="search-empty">No tools found for "<b>${query}</b>". Try "quiz", "pdf" or "legal".</div>`;
