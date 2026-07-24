@@ -2382,22 +2382,48 @@ TOOL_RENDERERS['pdf-summarizer'] = (wrap) => {
     const box = $('#pdfResult', wrap);
     if(!text){ box.classList.add('hidden'); return; }
     const sentences = text.replace(/\s+/g,' ').split(/(?<=[.?!])\s+/).filter(s => s.length > 15);
-    const picked = sentences.length <= 8 ? sentences : sentences
-      .map((s,i)=>({s,score:s.length + (i===0?40:0) + (i<3?20:0) + (/\b(important|key|main|significant|therefore|conclusion|result)\b/i.test(s)?30:0)}))
-      .sort((a,b)=>b.score-a.score).slice(0,8).map(x=>x.s);
     const wordCount = text.split(/\s+/).length;
     const sentenceCount = sentences.length;
+
+    // Group sentences into logical parts based on content
+    const parts = [];
+    const introSentences = sentences.slice(0, Math.max(2, Math.ceil(sentences.length * 0.15)));
+    const mainSentences = sentences.slice(introSentences.length, -Math.max(2, Math.ceil(sentences.length * 0.15)) || sentences.length);
+    const conclusionSentences = sentences.slice(-Math.max(2, Math.ceil(sentences.length * 0.15)));
+
+    // Extract best sentences per section
+    const pickBest = (arr, count) => arr.length <= count ? arr : arr
+      .map((s,i)=>({s,score:s.length + (/\b(important|key|main|significant|therefore|conclusion|result|purpose|aim|objective)\b/i.test(s)?30:0)}))
+      .sort((a,b)=>b.score-a.score).slice(0, count).map(x=>x.s);
+
+    if(introSentences.length) parts.push({title:'Introduction & Overview', points: pickBest(introSentences, 3)});
+    if(mainSentences.length) parts.push({title:'Key Findings & Main Content', points: pickBest(mainSentences, 4)});
+    if(conclusionSentences.length && sentences.length > 4) parts.push({title:'Conclusion & Takeaways', points: pickBest(conclusionSentences, 3)});
+
+    // If text is too short for sections, just show all as one section
+    if(parts.length === 0 || sentences.length <= 4){
+      parts.length = 0;
+      parts.push({title:'Summary', points: pickBest(sentences, 6)});
+    }
+
     box.classList.remove('hidden');
     box.innerHTML = `
-      <div style="margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;">
+      <div style="margin-bottom:16px;display:flex;gap:16px;flex-wrap:wrap;">
         <span style="font-size:12px;color:var(--text-faint);">📄 ${wordCount} words</span>
         <span style="font-size:12px;color:var(--text-faint);">📝 ${sentenceCount} sentences</span>
-        <span style="font-size:12px;color:var(--text-faint);">✨ ${picked.length} key points extracted</span>
+        <span style="font-size:12px;color:var(--text-faint);">📑 ${parts.length} sections</span>
       </div>
-      <h4 style="font-size:15px;font-weight:700;margin-bottom:12px;">📋 Summary</h4>
-      <ol style="padding-left:20px;display:grid;gap:10px;">
-        ${picked.map((s,i) => `<li style="line-height:1.7;font-size:13.5px;color:var(--text-dim);"><b style="color:var(--text);">Point ${i+1}:</b> ${s}</li>`).join('')}
-      </ol>
+      ${parts.map((part, pi) => `
+        <div style="margin-bottom:20px;padding:16px;border-radius:12px;background:var(--glass-bg);border:1px solid var(--glass-border);">
+          <h4 style="font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <span style="width:24px;height:24px;border-radius:8px;background:var(--grad-soft);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--blue-soft);flex-shrink:0;">${pi+1}</span>
+            ${part.title}
+          </h4>
+          <ul style="padding-left:16px;display:grid;gap:8px;">
+            ${part.points.map(s => `<li style="line-height:1.75;font-size:13.5px;color:var(--text-dim);">${s}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('')}
     `;
   });
 };
