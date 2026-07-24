@@ -176,6 +176,7 @@ html[data-theme="light"] .tool-icon{background:rgba(59,130,246,0.08);border-colo
 html[data-theme="light"] .floater{background:rgba(255,255,255,0.85);border-color:rgba(20,22,40,0.1);}
 html[data-theme="light"] .search-bar{background:rgba(255,255,255,0.9);border-color:rgba(20,22,40,0.12);}
 html[data-theme="light"] #searchResults{background:rgba(255,255,255,0.98);border-color:rgba(20,22,40,0.14);box-shadow:0 10px 40px rgba(30,34,60,0.15);}
+html[data-theme="light"] #searchResults::after{background:linear-gradient(to top, rgba(255,255,255,0.98), transparent);}
 html[data-theme="light"] .pdf-dropzone,
 html[data-theme="light"] .img-dropzone{background:rgba(255,255,255,0.7);border-color:rgba(20,22,40,0.18);}
 html[data-theme="light"] .pdf-file-card{background:rgba(255,255,255,0.85);border-color:rgba(20,22,40,0.1);}
@@ -606,12 +607,17 @@ html[data-theme="light"] .theme-toggle-thumb .icon-sun{display:block;}
 .search-bar .btn{flex-shrink:0;}
 #searchResults{
   position:absolute;top:calc(100% + 12px);left:0;right:0;z-index:9000;
-  max-height:60vh;overflow-y:auto;text-align:left;
-  border-radius:var(--radius);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);
+  max-height:60vh;overflow-y:auto;overflow-x:hidden;text-align:left;
+  border-radius:var(--radius-lg);opacity:0;visibility:hidden;transform:translateY(-8px) scale(.98);
   transition:opacity .25s var(--ease), transform .25s var(--ease), visibility .25s;
-  padding:10px;
+  padding:10px 10px 0 10px;
   background:rgba(15,17,30,0.97);backdrop-filter:var(--glass-blur-2);-webkit-backdrop-filter:var(--glass-blur-2);
   border:1px solid var(--border-strong);box-shadow:var(--glass-shadow-2);
+}
+#searchResults::after{
+  content:'';position:sticky;bottom:0;left:0;right:0;display:block;height:40px;
+  background:linear-gradient(to top, rgba(15,17,30,0.97), transparent);
+  pointer-events:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);
 }
 #searchResults.active{opacity:1;visibility:visible;transform:translateY(0) scale(1);}
 .search-result-item{
