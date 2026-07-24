@@ -2342,18 +2342,49 @@ const TOOL_RENDERERS = {};
 /* -- PDF Summarizer (works on any pasted text, not just PDFs) -- */
 TOOL_RENDERERS['pdf-summarizer'] = (wrap) => {
   wrap.innerHTML = `
-    <div class="field"><label>Paste your text / notes</label><textarea id="pdfText" placeholder="Paste a paragraph or article here..."></textarea></div>
+    <div class="field"><label>Upload a PDF</label>
+      <div class="pdf-dropzone" id="pdfSumDropzone" style="padding:20px;cursor:pointer;">
+        <p style="font-size:13px;color:var(--text-dim);text-align:center;">Click or drag a PDF file here</p>
+        <input type="file" id="pdfSumFile" accept=".pdf" style="display:none;">
+      </div>
+      <p id="pdfSumFileName" style="font-size:12px;color:var(--text-faint);margin-top:6px;"></p>
+    </div>
+    <div class="field"><label>Or paste your text / notes</label><textarea id="pdfText" placeholder="Paste a paragraph or article here..."></textarea></div>
     <button class="btn btn-primary btn-block" id="pdfBtn">Summarize</button>
     <div class="result-box hidden" id="pdfResult"></div>
   `;
+  let extractedText = '';
+  const dropzone = $('#pdfSumDropzone', wrap);
+  const fileInput = $('#pdfSumFile', wrap);
+  const fileName = $('#pdfSumFileName', wrap);
+  dropzone.addEventListener('click', () => fileInput.click());
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.style.borderColor = 'var(--blue-soft)'; });
+  dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = ''; });
+  dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.style.borderColor = ''; if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  fileInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+  async function handleFile(file){
+    fileName.textContent = 'Reading ' + file.name + '...';
+    await ensurePdfJs();
+    const buf = await file.arrayBuffer();
+    const doc = await window['pdfjsLib'].getDocument({data:buf}).promise;
+    let text = '';
+    for(let i=1; i<=doc.numPages; i++){
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(it => it.str).join(' ') + '\n\n';
+    }
+    extractedText = text.trim();
+    fileName.textContent = file.name + ' — ' + doc.numPages + ' pages, ' + extractedText.split(/\s+/).length + ' words extracted';
+    $('#pdfText', wrap).value = extractedText;
+  }
   $('#pdfBtn', wrap).addEventListener('click', () => {
     const text = $('#pdfText', wrap).value.trim();
     const box = $('#pdfResult', wrap);
     if(!text){ box.classList.add('hidden'); return; }
     const sentences = text.replace(/\s+/g,' ').split(/(?<=[.?!])\s+/).filter(s => s.length > 15);
-    const picked = sentences.length <= 4 ? sentences : sentences
+    const picked = sentences.length <= 6 ? sentences : sentences
       .map((s,i)=>({s,score:s.length + (i===0?40:0)}))
-      .sort((a,b)=>b.score-a.score).slice(0,4).map(x=>x.s);
+      .sort((a,b)=>b.score-a.score).slice(0,6).map(x=>x.s);
     box.classList.remove('hidden');
     box.innerHTML = `<b>Key points:</b><ul style="margin-top:8px;padding-left:18px;">${picked.map(s=>`<li style="margin-bottom:6px;">${s}</li>`).join('')}</ul>`;
   });
