@@ -356,17 +356,20 @@ html{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.14) transparent;}
 header#navbar{
   position:fixed;top:0;left:0;right:0;z-index:1000;
   padding:16px 0;
-  /* The navbar is a Glass Navbar component at all times — never fully
-     transparent — it just becomes slightly more opaque once scrolled
-     so page content doesn't show through as strongly underneath it. */
   background:rgba(10,12,22,0.32);
   backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
-  border-bottom:1px solid var(--glass-border);
-  transition:background .4s var(--ease), border-color .4s var(--ease), padding .4s var(--ease);
+  border-bottom:none;
+  transition:background .4s var(--ease), padding .4s var(--ease);
 }
+header#navbar::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-border-strong) 30%, var(--glass-border-strong) 70%, transparent);
+  opacity:0.6;transition:opacity .4s var(--ease);
+}
+header#navbar.scrolled::after{opacity:1;}
 header#navbar.scrolled{
   background:rgba(10,12,22,0.6);
-  border-bottom:1px solid var(--glass-border-strong);padding:11px 0;
+  padding:11px 0;
   box-shadow:var(--glass-shadow-1);
 }
 /* The navbar keeps its own wider, fixed max-width (independent of the
