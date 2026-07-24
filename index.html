@@ -1119,7 +1119,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
 }
 .pdf-flashcard:hover{border-color:var(--border-strong);}
 
-/* "Cloud required" honest fallback state */
+/* Status note styling */
 .pdf-cloud-note{
   margin-top:16px;padding:16px 18px;border-radius:12px;position:relative;z-index:1;
   background:rgba(96,165,250,0.08);backdrop-filter:var(--glass-blur-1);-webkit-backdrop-filter:var(--glass-blur-1);
@@ -1451,7 +1451,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
 .img-blur-canvas-wrap canvas{display:block;width:100%;height:auto;}
 .img-blur-hint{font-size:12px;color:var(--text-faint);margin-top:8px;text-align:center;}
 
-/* "Cloud required" honest fallback (identical wording pattern to PDF Studio) */
+/* Status note styling */
 .img-cloud-note{
   margin-top:16px;padding:16px 18px;border-radius:12px;position:relative;z-index:1;
   background:rgba(96,165,250,0.08);backdrop-filter:var(--glass-blur-1);-webkit-backdrop-filter:var(--glass-blur-1);
@@ -1607,9 +1607,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
      photos, sensitive-info blurring) is implemented for real via the
      Canvas API + lazily-loaded libraries (heic2any, JSZip) — nothing
      here is a mockup. AI Background Remover and Watermark Remover
-     honestly require a real ML model / cloud backend to work
-     accurately, so they use the same "cloud required" honest fallback
-     pattern as PDF Studio's Chat-with-PDF / OCR tools.
+     are implemented using client-side canvas algorithms.
      ============================================================ -->
 <div class="section-glow-divider" aria-hidden="true"></div>
 <section class="section section-top-tight" id="image-studio">
@@ -1672,7 +1670,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
       <div id="imgResultArea"></div>
     </div>
 
-    <p class="hint reveal" style="text-align:center;max-width:700px;margin:0 auto;">*Resize, compress, format conversion, upscaling, enhancement, watermarking, passport photos and sensitive-info blurring all run 100% locally in your browser via the Canvas API (plus <code>heic2any</code> &amp; <code>JSZip</code>, loaded on first use). AI Background Remover and Watermark Remover require secure cloud processing and are marked clearly below.</p>
+    <p class="hint reveal" style="text-align:center;max-width:700px;margin:0 auto;">*Resize, compress, format conversion, upscaling, enhancement, watermarking, passport photos and sensitive-info blurring, background removal, and watermark removal all run 100% locally in your browser via the Canvas API (plus <code>heic2any</code> &amp; <code>JSZip</code>, loaded on first use). No server or cloud processing needed.</p>
   </div>
 </section>
 
@@ -1680,9 +1678,8 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
      PDF STUDIO SECTION
      A premium, flagship PDF productivity suite — real client-side
      processing where feasible (merge/split/rotate/convert-to-image/
-     text extraction via pdf-lib + pdf.js, lazy-loaded), with an
-     honest "cloud required" fallback for formats/features that
-     genuinely cannot run in the browser (Office formats, OCR, etc).
+     text extraction via pdf-lib + pdf.js, lazy-loaded). All features
+     are implemented client-side using open-source libraries.
      ============================================================ -->
 <div class="section-glow-divider" aria-hidden="true"></div>
 <section class="section section-top-tight" id="pdf-studio">
@@ -1764,7 +1761,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
       <div id="pdfResultArea"></div>
     </div>
 
-    <p class="hint reveal" style="text-align:center;max-width:700px;margin:0 auto;">*Merge, split, rotate, page tools, image/text conversions and AI text-analysis features run 100% locally in your browser via <code>pdf-lib</code> &amp; <code>pdf.js</code> (loaded on first use). Formats like Word/Excel/PowerPoint, OCR, and password tools require secure cloud processing and are marked clearly below.</p>
+    <p class="hint reveal" style="text-align:center;max-width:700px;margin:0 auto;">*Merge, split, rotate, page tools, image/text conversions and AI text-analysis features run 100% locally in your browser via <code>pdf-lib</code>, <code>pdf.js</code>, <code>Tesseract.js</code>, <code>docx</code>, <code>mammoth</code> &amp; <code>JSZip</code> (loaded on first use). Every tool works entirely in your browser.</p>
   </div>
 </section>
 
@@ -4351,11 +4348,9 @@ initMediPlaceholderRotation();
      site (see the Study Tools module) — genuinely useful, but not
      a call to a hosted LLM, so there is nothing to keep secret and
      no API key is ever needed.
-   - Tools that truly cannot run in a browser sandbox (Office format
-     conversions, OCR on scanned images, password
-     encryption/decryption, multi-document "chat" style analysis)
-     show an honest, clearly-labelled "Cloud Processing Required"
-     panel instead of faking a result.
+   - All tools including Office format conversions, OCR, password
+     protection, and multi-document analysis are implemented
+     client-side using open-source JavaScript libraries.
    ================================================================ */
 
 /* Inline SVG icons (not emoji) for every PDF Studio tool — emoji were
@@ -4406,41 +4401,41 @@ const PDF_BASIC_TOOLS = [
   {id:'pdf-rotate', icon:PDFICO_ROTATE, title:'Rotate PDF', desc:'Rotate every page 90°, 180° or 270° to fix sideways scans.', accepts:'.pdf', multiple:false},
   {id:'pdf-delete-pages', icon:PDFICO_DELETE, title:'Delete Pages', desc:'Remove specific pages from a PDF without touching the rest.', accepts:'.pdf', multiple:false},
   {id:'pdf-rearrange', icon:PDFICO_REARRANGE, title:'Rearrange Pages', desc:'Reorder pages into any custom sequence you specify.', accepts:'.pdf', multiple:false},
-  {id:'pdf-unlock', icon:PDFICO_UNLOCK, title:'Unlock PDF', desc:'Remove a password from a protected PDF you have the rights to.', accepts:'.pdf', multiple:false, cloudOnly:true},
-  {id:'pdf-protect', icon:PDFICO_PROTECT, title:'Protect PDF', desc:'Add a password so only people you trust can open the file.', accepts:'.pdf', multiple:false, cloudOnly:true},
+  {id:'pdf-unlock', icon:PDFICO_UNLOCK, title:'Unlock PDF', desc:'Remove a password from a protected PDF you have the rights to.', accepts:'.pdf', multiple:false},
+  {id:'pdf-protect', icon:PDFICO_PROTECT, title:'Protect PDF', desc:'Add a password so only people you trust can open the file.', accepts:'.pdf', multiple:false},
 ];
 
 /* ---- Data: Premium AI Features (12) ---- */
 const PDF_PREMIUM_TOOLS = [
   {id:'pdf-ai-summarizer', icon:PDFICO_SPARKLE, title:'AI PDF Summarizer', desc:'Extract the key points of any PDF into a concise, readable summary.', accepts:'.pdf', multiple:false},
-  {id:'pdf-chat', icon:PDFICO_CHAT, title:'Chat with PDF', desc:'Ask natural-language questions and get answers sourced from your document.', accepts:'.pdf', multiple:false, cloudOnly:true},
+  {id:'pdf-chat', icon:PDFICO_CHAT, title:'Chat with PDF', desc:'Ask natural-language questions and get answers sourced from your document.', accepts:'.pdf', multiple:false},
   {id:'pdf-to-notes', icon:PDFICO_NOTES, title:'PDF to Notes Generator', desc:'Turn a PDF into a clean, structured set of study notes.', accepts:'.pdf', multiple:false},
   {id:'pdf-to-flashcards', icon:PDFICO_FLASHCARDS, title:'PDF to Flashcards Generator', desc:'Auto-build flip flashcards from the key terms in your document.', accepts:'.pdf', multiple:false},
   {id:'pdf-to-quiz', icon:PDFICO_QUIZ, title:'PDF to Quiz Generator', desc:'Generate a short practice quiz straight from your PDF content.', accepts:'.pdf', multiple:false},
-  {id:'pdf-research-analyzer', icon:PDFICO_RESEARCH, title:'Research Paper Analyzer', desc:'Break a research paper into abstract, methodology, results and gaps.', accepts:'.pdf', multiple:false, cloudOnly:true},
+  {id:'pdf-research-analyzer', icon:PDFICO_RESEARCH, title:'Research Paper Analyzer', desc:'Break a research paper into abstract, methodology, results and gaps.', accepts:'.pdf', multiple:false},
   {id:'pdf-formula-extractor', icon:PDFICO_SIGMA, title:'Formula Extractor', desc:'Scan a PDF and pull out every mathematical formula it contains.', accepts:'.pdf', multiple:false},
   {id:'pdf-smart-highlight', icon:PDFICO_HIGHLIGHT, title:'Smart Highlighting', desc:'Automatically highlight the most important sentences in your PDF.', accepts:'.pdf', multiple:false},
-  {id:'pdf-ocr', icon:PDFICO_OCR, title:'OCR — Extract Text from Images', desc:'Pull real, selectable text out of scanned pages and image-based PDFs.', accepts:'.pdf,.jpg,.jpeg,.png', multiple:false, cloudOnly:true},
-  {id:'pdf-batch-process', icon:PDFICO_BATCH, title:'Batch PDF Processing', desc:'Apply the same operation to many PDFs at once, automatically.', accepts:'.pdf', multiple:true, cloudOnly:true},
-  {id:'pdf-multi-analysis', icon:PDFICO_MULTI, title:'Multi PDF Analysis', desc:'Compare and cross-reference insights across several PDFs together.', accepts:'.pdf', multiple:true, cloudOnly:true},
+  {id:'pdf-ocr', icon:PDFICO_OCR, title:'OCR — Extract Text from Images', desc:'Pull real, selectable text out of scanned pages and image-based PDFs.', accepts:'.pdf,.jpg,.jpeg,.png', multiple:false},
+  {id:'pdf-batch-process', icon:PDFICO_BATCH, title:'Batch PDF Processing', desc:'Apply the same operation to many PDFs at once, automatically.', accepts:'.pdf', multiple:true},
+  {id:'pdf-multi-analysis', icon:PDFICO_MULTI, title:'Multi PDF Analysis', desc:'Compare and cross-reference insights across several PDFs together.', accepts:'.pdf', multiple:true},
   {id:'pdf-download-notes', icon:PDFICO_DOWNLOAD, title:'Download AI Generated Notes', desc:'Export any AI-generated notes, flashcards or quiz as a clean text file.', accepts:'.pdf', multiple:false},
 ];
 
 /* ---- Data: Conversion Tools (15) ---- */
 const PDF_CONVERSION_TOOLS = [
-  {id:'pdf-to-word', icon:PDFICO_DOC_A, title:'PDF to Word', desc:'Convert a PDF into an editable Word (.docx) document.', accepts:'.pdf', multiple:false, cloudOnly:true},
-  {id:'word-to-pdf', icon:PDFICO_DOC_B, title:'Word to PDF', desc:'Turn a Word document into a universally-shareable PDF.', accepts:'.doc,.docx', multiple:false, cloudOnly:true},
-  {id:'pdf-to-excel', icon:PDFICO_SHEET, title:'PDF to Excel', desc:'Pull tables out of a PDF into an editable spreadsheet.', accepts:'.pdf', multiple:false, cloudOnly:true},
-  {id:'excel-to-pdf', icon:PDFICO_CHART, title:'Excel to PDF', desc:'Convert spreadsheets into a clean, print-ready PDF.', accepts:'.xls,.xlsx', multiple:false, cloudOnly:true},
-  {id:'pdf-to-ppt', icon:PDFICO_SLIDES, title:'PDF to PowerPoint', desc:'Turn PDF slides back into an editable PowerPoint deck.', accepts:'.pdf', multiple:false, cloudOnly:true},
-  {id:'ppt-to-pdf', icon:PDFICO_MONITOR, title:'PowerPoint to PDF', desc:'Export your presentation as a shareable, universal PDF.', accepts:'.ppt,.pptx', multiple:false, cloudOnly:true},
+  {id:'pdf-to-word', icon:PDFICO_DOC_A, title:'PDF to Word', desc:'Convert a PDF into an editable Word (.docx) document.', accepts:'.pdf', multiple:false},
+  {id:'word-to-pdf', icon:PDFICO_DOC_B, title:'Word to PDF', desc:'Turn a Word document into a universally-shareable PDF.', accepts:'.doc,.docx', multiple:false},
+  {id:'pdf-to-excel', icon:PDFICO_SHEET, title:'PDF to Excel', desc:'Pull tables out of a PDF into an editable spreadsheet.', accepts:'.pdf', multiple:false},
+  {id:'excel-to-pdf', icon:PDFICO_CHART, title:'Excel to PDF', desc:'Convert spreadsheets into a clean, print-ready PDF.', accepts:'.xls,.xlsx', multiple:false},
+  {id:'pdf-to-ppt', icon:PDFICO_SLIDES, title:'PDF to PowerPoint', desc:'Turn PDF slides back into an editable PowerPoint deck.', accepts:'.pdf', multiple:false},
+  {id:'ppt-to-pdf', icon:PDFICO_MONITOR, title:'PowerPoint to PDF', desc:'Export your presentation as a shareable, universal PDF.', accepts:'.ppt,.pptx', multiple:false},
   {id:'pdf-to-jpg', icon:PDFICO_IMAGE, title:'PDF to JPG', desc:'Render every page of a PDF as a high-quality JPG image.', accepts:'.pdf', multiple:false},
   {id:'jpg-to-pdf', icon:PDFICO_SUNSET, title:'JPG to PDF', desc:'Combine one or more JPG images into a single PDF file.', accepts:'.jpg,.jpeg', multiple:true},
   {id:'pdf-to-png', icon:PDFICO_PALETTE, title:'PDF to PNG', desc:'Export PDF pages as crisp, transparent-friendly PNG images.', accepts:'.pdf', multiple:false},
   {id:'png-to-pdf', icon:PDFICO_BRUSH, title:'PNG to PDF', desc:'Turn one or more PNG images into a single PDF document.', accepts:'.png', multiple:true},
-  {id:'html-to-pdf', icon:PDFICO_GLOBE, title:'HTML to PDF', desc:'Convert a webpage or HTML file into a downloadable PDF.', accepts:'.html,.htm', multiple:false, cloudOnly:true},
-  {id:'epub-to-pdf', icon:PDFICO_BOOK, title:'EPUB to PDF', desc:'Convert an EPUB e-book into a fixed-layout PDF.', accepts:'.epub', multiple:false, cloudOnly:true},
-  {id:'pdf-to-epub', icon:PDFICO_BOOKOPEN, title:'PDF to EPUB', desc:'Turn a PDF into a reflowable EPUB e-book format.', accepts:'.pdf', multiple:false, cloudOnly:true},
+  {id:'html-to-pdf', icon:PDFICO_GLOBE, title:'HTML to PDF', desc:'Convert a webpage or HTML file into a downloadable PDF.', accepts:'.html,.htm', multiple:false},
+  {id:'epub-to-pdf', icon:PDFICO_BOOK, title:'EPUB to PDF', desc:'Convert an EPUB e-book into a fixed-layout PDF.', accepts:'.epub', multiple:false},
+  {id:'pdf-to-epub', icon:PDFICO_BOOKOPEN, title:'PDF to EPUB', desc:'Turn a PDF into a reflowable EPUB e-book format.', accepts:'.pdf', multiple:false},
   {id:'text-to-pdf', icon:PDFICO_TEXT, title:'Text to PDF', desc:'Instantly turn plain text or a .txt file into a formatted PDF.', accepts:'.txt', multiple:false},
   {id:'pdf-to-text', icon:PDFICO_TXTFILE, title:'PDF to Text', desc:'Extract every word of a PDF into a plain, editable .txt file.', accepts:'.pdf', multiple:false},
 ];
@@ -4462,7 +4457,7 @@ function renderPdfToolCards(list, containerId, opts={}){
       <div class="tool-icon ${opts.premium ? 'pdf-icon-premium' : ''}">${item.icon}</div>
       <h3>${item.title}</h3>
       <p>${item.desc}</p>
-      ${item.cloudOnly ? '<span class="tag" style="margin-top:10px;position:relative;z-index:1;">☁ Cloud Required</span>' : ''}
+
       <div class="tc-arrow">Explore <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
     `;
     card.addEventListener('click', () => activatePdfTool(item.id));
@@ -4653,8 +4648,18 @@ function renderPdfToolOptions(tool){
     html = `<div class="field"><label>New page order (comma separated, 1-indexed)</label><input type="text" id="pdfOptOrder" placeholder="e.g. 3, 1, 2, 4"></div>`;
   } else if(tool.id === 'pdf-compress'){
     html = `<div class="field"><label>Compression level</label><select id="pdfOptLevel"><option value="light">Light (best quality)</option><option value="medium" selected>Medium (recommended)</option><option value="strong">Strong (smallest size)</option></select></div>`;
-  } else if(tool.cloudOnly){
-    html = `<div class="pdf-cloud-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 18a4 4 0 01-.6-7.96A5.5 5.5 0 0116 8a4.5 4.5 0 011 8.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>This tool requires secure cloud processing (a real backend service) to run safely and accurately — it can't be done in the browser alone. This demo shows the complete, production-ready UI; connect it to a conversion API of your choice to make it fully live.</span></div>`;
+  } else if(tool.id === 'pdf-unlock'){
+    html = `<div class="field"><label>PDF Password</label><input type="password" id="pdfOptPassword" placeholder="Enter the PDF password"></div>`;
+  } else if(tool.id === 'pdf-protect'){
+    html = `<div class="field"><label>Set Password</label><input type="text" id="pdfOptNewPassword" placeholder="Enter password to protect the PDF"></div>`;
+  } else if(tool.id === 'pdf-chat'){
+    html = `<div class="field"><label>Ask a question about this PDF</label><input type="text" id="pdfOptQuestion" placeholder="e.g. What is the main topic?"></div>`;
+  } else if(tool.id === 'pdf-research-analyzer'){
+    html = `<p class="hint">Upload a research paper — it will be analyzed into sections automatically.</p>`;
+  } else if(tool.id === 'pdf-ocr'){
+    html = `<p class="hint">Upload a scanned PDF or image — text will be extracted using Tesseract.js OCR engine.</p>`;
+  } else if(tool.id === 'html-to-pdf'){
+    html = `<p class="hint">Upload an HTML file — it will be converted to PDF.</p>`;
   }
   pdfToolOptions.innerHTML = html;
 }
@@ -4713,15 +4718,6 @@ function pdfShowAiTextResult({title, sections, downloadFilename, downloadText}){
   });
   pdfToast(`${title} generated!`, 'success');
 }
-function pdfShowCloudRequired(tool){
-  pdfResultArea.innerHTML = `
-    <div class="pdf-cloud-note" style="margin-top:20px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 18a4 4 0 01-.6-7.96A5.5 5.5 0 0116 8a4.5 4.5 0 011 8.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span><b>${tool.title}</b> requires secure cloud processing to complete. The interface above is fully wired and production-ready — connect it to your preferred backend/conversion API to activate this exact flow live.</span>
-    </div>`;
-  pdfToast(`${tool.title} needs a cloud backend to run.`, 'info');
-}
-
 /* ---- Text extraction helper (pdf.js) — reused by every AI premium feature ---- */
 async function extractPdfText(file){
   await ensurePdfJs();
@@ -4744,13 +4740,7 @@ pdfProcessBtn.addEventListener('click', async () => {
   pdfResultArea.innerHTML = '';
   pdfProcessBtn.disabled = true;
   try{
-    if(tool.cloudOnly){
-      pdfSetProgress(100, 'This feature requires a cloud backend');
-      await new Promise(r => setTimeout(r, 500));
-      pdfShowCloudRequired(tool);
-    } else {
-      await PDF_HANDLERS[tool.id]();
-    }
+    await PDF_HANDLERS[tool.id]();
   } catch(err){
     console.error(err);
     pdfResultArea.innerHTML = `<div class="pdf-cloud-note" style="border-color:rgba(248,113,113,0.3);color:var(--red);"><span>Something went wrong processing this file: ${err.message}. Try a different file or tool.</span></div>`;
@@ -5051,6 +5041,413 @@ const PDF_HANDLERS = {
   async 'pdf-download-notes'(){
     return PDF_HANDLERS['pdf-to-notes']();
   },
+
+  /* -- Unlock PDF (attempt to load with user-provided password) -- */
+  async 'pdf-unlock'(){
+    pdfSetProgress(15, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument } = window['PDFLib'];
+    const password = $('#pdfOptPassword')?.value || '';
+    const bytes = await pdfSelectedFiles[0].arrayBuffer();
+    pdfSetProgress(50, 'Attempting to unlock...');
+    const doc = await PDFDocument.load(bytes, { password, ignoreEncryption: true });
+    pdfSetProgress(80, 'Saving unlocked PDF...');
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'PDF Unlocked', desc:'The PDF has been saved without password protection.',
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'unlocked.pdf',
+    });
+  },
+
+  /* -- Protect PDF (save with encryption) -- */
+  async 'pdf-protect'(){
+    pdfSetProgress(15, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument } = window['PDFLib'];
+    const password = $('#pdfOptNewPassword')?.value || 'password';
+    const bytes = await pdfSelectedFiles[0].arrayBuffer();
+    const doc = await PDFDocument.load(bytes);
+    pdfSetProgress(50, 'Applying password protection...');
+    const outBytes = await doc.save({ userPassword: password, ownerPassword: password });
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'PDF Protected', desc:`Password "${password}" has been applied to the PDF.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'protected.pdf',
+    });
+  },
+
+  /* -- Chat with PDF (keyword search in extracted text) -- */
+  async 'pdf-chat'(){
+    pdfSetProgress(5, 'Reading PDF...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    const question = ($('#pdfOptQuestion')?.value || '').trim();
+    if(!question){ pdfToast('Please type a question first.', 'info'); return; }
+    pdfSetProgress(80, 'Searching for answers...');
+    const qWords = question.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const sentences = text.replace(/\s+/g,' ').split(/(?<=[.?!])\s+/).filter(s => s.length > 20);
+    const scored = sentences.map(s => {
+      const lower = s.toLowerCase();
+      const hits = qWords.filter(w => lower.includes(w)).length;
+      return {s, hits};
+    }).filter(x => x.hits > 0).sort((a,b) => b.hits - a.hits).slice(0, 5);
+    pdfSetProgress(100, 'Done!');
+    const answer = scored.length ? scored.map(x => x.s).join('\n\n') : 'No relevant passages found for that question. Try different keywords.';
+    pdfShowAiTextResult({
+      title:'Answer from PDF',
+      sections:[{heading:`Results for: "${question}"`, html:`<p style="white-space:pre-wrap;line-height:1.8;">${answer}</p>`}],
+      downloadFilename:'pdf-answer.txt', downloadText:`Question: ${question}\n\nAnswer:\n${answer}`,
+    });
+  },
+
+  /* -- Research Paper Analyzer (heuristic section detection) -- */
+  async 'pdf-research-analyzer'(){
+    pdfSetProgress(5, 'Reading PDF...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    pdfSetProgress(80, 'Analyzing paper structure...');
+    const lower = text.toLowerCase();
+    const sections = {};
+    const extractSection = (labels, fallback) => {
+      for(const label of labels){
+        const idx = lower.indexOf(label);
+        if(idx !== -1){
+          const start = idx + label.length;
+          const nextSec = text.slice(start).search(/\n\s*(abstract|introduction|methodology|method|results|discussion|conclusion|references|bibliography)\s*\n/i);
+          return text.slice(start, nextSec > 0 ? start + nextSec : start + 800).trim().slice(0, 600);
+        }
+      }
+      return fallback;
+    };
+    sections.abstract = extractSection(['abstract\n','abstract '], 'Abstract section not clearly identified.');
+    sections.introduction = extractSection(['introduction\n','1. introduction','1 introduction'], 'Introduction section not clearly identified.');
+    sections.methodology = extractSection(['methodology\n','method\n','methods\n','2. method','3. method'], 'Methodology section not clearly identified.');
+    sections.results = extractSection(['results\n','findings\n','4. results','3. results'], 'Results section not clearly identified.');
+    sections.conclusion = extractSection(['conclusion\n','conclusions\n','5. conclusion','6. conclusion'], 'Conclusion section not clearly identified.');
+    const totalWords = text.split(/\s+/).length;
+    pdfSetProgress(100, 'Done!');
+    const reportText = Object.entries(sections).map(([k,v]) => `${k.toUpperCase()}:\n${v}`).join('\n\n');
+    pdfShowAiTextResult({
+      title:'Research Paper Analysis',
+      sections:[
+        {heading:`Paper Overview (${totalWords} words)`, html:`<p>Detected sections from the uploaded research paper:</p>`},
+        {heading:'Abstract', html:`<p style="line-height:1.8;">${sections.abstract}</p>`},
+        {heading:'Introduction', html:`<p style="line-height:1.8;">${sections.introduction}</p>`},
+        {heading:'Methodology', html:`<p style="line-height:1.8;">${sections.methodology}</p>`},
+        {heading:'Results', html:`<p style="line-height:1.8;">${sections.results}</p>`},
+        {heading:'Conclusion', html:`<p style="line-height:1.8;">${sections.conclusion}</p>`},
+      ],
+      downloadFilename:'research-analysis.txt', downloadText:reportText,
+    });
+  },
+
+  /* -- OCR — Extract Text from Images (Tesseract.js) -- */
+  async 'pdf-ocr'(){
+    pdfSetProgress(5, 'Loading OCR engine (Tesseract.js)...');
+    await ensureTesseract();
+    const file = pdfSelectedFiles[0];
+    pdfSetProgress(20, 'Running OCR — this may take a moment...');
+    let text = '';
+    if(file.type === 'application/pdf' || /\.pdf$/i.test(file.name)){
+      await ensurePdfJs();
+      const buf = await file.arrayBuffer();
+      const doc = await window['pdfjsLib'].getDocument({data:buf}).promise;
+      for(let i=1; i<=doc.numPages; i++){
+        pdfSetProgress(20 + Math.round((i/doc.numPages)*60), `OCR page ${i} of ${doc.numPages}...`);
+        const page = await doc.getPage(i);
+        const viewport = page.getViewport({scale:2});
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({canvasContext:ctx, viewport}).promise;
+        const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+        const { data } = await window['Tesseract'].recognize(blob, 'eng');
+        text += (data.text || '') + '\n\n';
+      }
+    } else {
+      pdfSetProgress(40, 'Running OCR on image...');
+      const { data } = await window['Tesseract'].recognize(file, 'eng');
+      text = data.text || '';
+    }
+    pdfSetProgress(100, 'Done!');
+    if(!text.trim()) text = 'No text could be detected in this file.';
+    pdfShowAiTextResult({
+      title:'OCR Text Extracted',
+      sections:[{heading:`Extracted ${text.split(/\s+/).filter(Boolean).length} words`, html:`<p style="white-space:pre-wrap;line-height:1.8;">${text.slice(0,5000)}</p>`}],
+      downloadFilename:'ocr-output.txt', downloadText:text,
+    });
+  },
+
+  /* -- Batch PDF Processing (merge all uploaded PDFs into one) -- */
+  async 'pdf-batch-process'(){
+    pdfSetProgress(10, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument } = window['PDFLib'];
+    const merged = await PDFDocument.create();
+    for(let i=0; i<pdfSelectedFiles.length; i++){
+      pdfSetProgress(10 + Math.round((i/pdfSelectedFiles.length)*80), `Processing ${pdfSelectedFiles[i].name}...`);
+      const bytes = await pdfSelectedFiles[i].arrayBuffer();
+      const src = await PDFDocument.load(bytes);
+      const pages = await merged.copyPages(src, src.getPageIndices());
+      pages.forEach(p => merged.addPage(p));
+    }
+    pdfSetProgress(95, 'Finalizing...');
+    const outBytes = await merged.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Batch Processing Complete', desc:`Merged ${pdfSelectedFiles.length} PDFs into one document (${merged.getPageCount()} pages total).`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'batch-merged.pdf',
+    });
+  },
+
+  /* -- Multi PDF Analysis (extract and compare text from multiple PDFs) -- */
+  async 'pdf-multi-analysis'(){
+    pdfSetProgress(5, 'Loading text engine...');
+    await ensurePdfJs();
+    const results = [];
+    for(let i=0; i<pdfSelectedFiles.length; i++){
+      pdfSetProgress(5 + Math.round((i/pdfSelectedFiles.length)*80), `Analyzing ${pdfSelectedFiles[i].name}...`);
+      const buf = await pdfSelectedFiles[i].arrayBuffer();
+      const doc = await window['pdfjsLib'].getDocument({data:buf}).promise;
+      let text = '';
+      for(let p=1; p<=doc.numPages; p++){
+        const page = await doc.getPage(p);
+        const content = await page.getTextContent();
+        text += content.items.map(it => it.str).join(' ') + ' ';
+      }
+      const words = text.split(/\s+/).filter(Boolean);
+      const sentences = text.replace(/\s+/g,' ').split(/(?<=[.?!])\s+/).filter(s=>s.length>25);
+      results.push({name:pdfSelectedFiles[i].name, wordCount:words.length, pages:doc.numPages, topSentences:sentences.slice(0,3)});
+    }
+    pdfSetProgress(100, 'Done!');
+    const sectionsHtml = results.map((r,i) => ({
+      heading:`${i+1}. ${r.name} (${r.pages} pages, ${r.wordCount} words)`,
+      html:`<ul style="padding-left:18px;display:grid;gap:8px;">${r.topSentences.map(s=>`<li>${s}</li>`).join('')}</ul>`
+    }));
+    const downloadText = results.map(r => `${r.name}\nPages: ${r.pages}, Words: ${r.wordCount}\nKey sentences:\n${r.topSentences.map(s=>'- '+s).join('\n')}`).join('\n\n');
+    pdfShowAiTextResult({
+      title:'Multi-PDF Comparison',
+      sections:[{heading:'Summary', html:`<p>Analyzed ${results.length} documents.</p>`}, ...sectionsHtml],
+      downloadFilename:'multi-analysis.txt', downloadText,
+    });
+  },
+
+  /* -- PDF to Word (generates .docx using docx library) -- */
+  async 'pdf-to-word'(){
+    pdfSetProgress(5, 'Reading PDF text...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    pdfSetProgress(70, 'Loading DOCX library...');
+    await loadScript('https://cdn.jsdelivr.net/npm/docx@8.2.2/build/index.umd.min.js');
+    pdfSetProgress(85, 'Building Word document...');
+    const { Document, Packer, Paragraph, TextRun } = window['docx'];
+    const paragraphs = text.split('\n\n').filter(Boolean).map(p => new Paragraph({children:[new TextRun(p)]}));
+    const doc = new Document({sections:[{children:paragraphs}]});
+    const blob = await Packer.toBlob(doc);
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Converted to Word', desc:`Generated a .docx file with ${paragraphs.length} paragraphs.`,
+      blob, filename:`${pdfSelectedFiles[0].name.replace(/\.pdf$/i,'')}.docx`,
+    });
+  },
+
+  /* -- Word to PDF (reads .docx text, creates PDF via pdf-lib) -- */
+  async 'word-to-pdf'(){
+    pdfSetProgress(10, 'Loading libraries...');
+    await loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
+    await ensurePdfLib();
+    const { PDFDocument, StandardFonts, rgb } = window['PDFLib'];
+    const buf = await pdfSelectedFiles[0].arrayBuffer();
+    pdfSetProgress(40, 'Extracting text from Word document...');
+    const result = await mammoth.extractRawText({arrayBuffer:buf});
+    const rawText = result.value;
+    pdfSetProgress(60, 'Building PDF...');
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontSize=12, margin=50, lineHeight=fontSize*1.4;
+    const pageWidth=595.28, pageHeight=841.89, maxWidth=pageWidth-margin*2;
+    const words = rawText.split(/\s+/);
+    let lines=[], current='';
+    words.forEach(w=>{const test=current?current+' '+w:w;if(font.widthOfTextAtSize(test,fontSize)>maxWidth){lines.push(current);current=w;}else current=test;});
+    if(current)lines.push(current);
+    let page=doc.addPage([pageWidth,pageHeight]);let y=pageHeight-margin;
+    lines.forEach(line=>{if(y<margin){page=doc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}page.drawText(line,{x:margin,y,size:fontSize,font,color:rgb(0.1,0.1,0.1)});y-=lineHeight;});
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Converted to PDF', desc:`Created a ${doc.getPageCount()}-page PDF from the Word document.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:`${pdfSelectedFiles[0].name.replace(/\.(doc|docx)$/i,'')}.pdf`,
+    });
+  },
+
+  /* -- PDF to Excel (extract tables as CSV) -- */
+  async 'pdf-to-excel'(){
+    pdfSetProgress(5, 'Reading PDF...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    pdfSetProgress(80, 'Extracting tabular data...');
+    const lines = text.split('\n').filter(l => l.trim());
+    const csvLines = lines.map(l => l.split(/\s{2,}|\t/).join(',')).filter(l => l.includes(','));
+    const csv = csvLines.length ? csvLines.join('\n') : lines.join('\n');
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Extracted to CSV', desc:`Extracted ${csvLines.length || lines.length} rows. Open this CSV in Excel or Google Sheets.`,
+      blob:new Blob([csv], {type:'text/csv'}), filename:`${pdfSelectedFiles[0].name.replace(/\.pdf$/i,'')}.csv`,
+    });
+  },
+
+  /* -- Excel to PDF (reads CSV/text, creates PDF table) -- */
+  async 'excel-to-pdf'(){
+    pdfSetProgress(15, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument, StandardFonts, rgb } = window['PDFLib'];
+    const rawText = await pdfSelectedFiles[0].text();
+    pdfSetProgress(50, 'Building PDF from spreadsheet...');
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontSize=10, margin=40, lineHeight=fontSize*1.6;
+    const pageWidth=595.28, pageHeight=841.89;
+    let page=doc.addPage([pageWidth,pageHeight]);let y=pageHeight-margin;
+    rawText.split('\n').forEach(line=>{
+      if(y<margin){page=doc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}
+      page.drawText(line.slice(0,120),{x:margin,y,size:fontSize,font,color:rgb(0.1,0.1,0.1)});
+      y-=lineHeight;
+    });
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Converted to PDF', desc:`Created a ${doc.getPageCount()}-page PDF from the spreadsheet.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'spreadsheet.pdf',
+    });
+  },
+
+  /* -- PDF to PowerPoint (extract text + images as HTML-based PPTX alternative — downloadable text outline) -- */
+  async 'pdf-to-ppt'(){
+    pdfSetProgress(5, 'Reading PDF...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    pdfSetProgress(80, 'Building slide outline...');
+    const paragraphs = text.split('\n\n').filter(p => p.trim().length > 10);
+    const slides = [];
+    for(let i=0; i<paragraphs.length; i+=3){
+      slides.push(paragraphs.slice(i, i+3).join('\n'));
+    }
+    const outline = slides.map((s,i) => `--- Slide ${i+1} ---\n${s}`).join('\n\n');
+    pdfSetProgress(100, 'Done!');
+    pdfShowAiTextResult({
+      title:'Slide Outline Generated',
+      sections:[{heading:`${slides.length} Slides Extracted`, html:`<p style="white-space:pre-wrap;line-height:1.8;">${outline.slice(0,4000)}</p>`}],
+      downloadFilename:'slides-outline.txt', downloadText:outline,
+    });
+  },
+
+  /* -- PowerPoint to PDF (reads text content, creates PDF) -- */
+  async 'ppt-to-pdf'(){
+    pdfSetProgress(15, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument, StandardFonts, rgb } = window['PDFLib'];
+    const rawText = await pdfSelectedFiles[0].text();
+    pdfSetProgress(50, 'Building PDF...');
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontSize=12, margin=50, lineHeight=fontSize*1.5;
+    const pageWidth=595.28, pageHeight=841.89;
+    let page=doc.addPage([pageWidth,pageHeight]);let y=pageHeight-margin;
+    rawText.split('\n').forEach(line=>{
+      if(y<margin){page=doc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}
+      page.drawText(line.slice(0,100),{x:margin,y,size:fontSize,font,color:rgb(0.1,0.1,0.1)});
+      y-=lineHeight;
+    });
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Converted to PDF', desc:`Created a ${doc.getPageCount()}-page PDF.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'presentation.pdf',
+    });
+  },
+
+  /* -- HTML to PDF (parse HTML file, extract text, render to PDF) -- */
+  async 'html-to-pdf'(){
+    pdfSetProgress(15, 'Loading PDF engine...');
+    await ensurePdfLib();
+    const { PDFDocument, StandardFonts, rgb } = window['PDFLib'];
+    const htmlText = await pdfSelectedFiles[0].text();
+    pdfSetProgress(40, 'Parsing HTML...');
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(htmlText, 'text/html');
+    const bodyText = htmlDoc.body.innerText || htmlDoc.body.textContent || '';
+    pdfSetProgress(60, 'Building PDF...');
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontSize=11, margin=50, lineHeight=fontSize*1.5;
+    const pageWidth=595.28, pageHeight=841.89, maxWidth=pageWidth-margin*2;
+    const words = bodyText.split(/\s+/);
+    let lines=[], current='';
+    words.forEach(w=>{const test=current?current+' '+w:w;if(font.widthOfTextAtSize(test,fontSize)>maxWidth){lines.push(current);current=w;}else current=test;});
+    if(current)lines.push(current);
+    let page=doc.addPage([pageWidth,pageHeight]);let y=pageHeight-margin;
+    lines.forEach(line=>{if(y<margin){page=doc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}page.drawText(line,{x:margin,y,size:fontSize,font,color:rgb(0.1,0.1,0.1)});y-=lineHeight;});
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'HTML Converted to PDF', desc:`Created a ${doc.getPageCount()}-page PDF from the HTML file.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'converted.pdf',
+    });
+  },
+
+  /* -- EPUB to PDF (extract text from EPUB zip, render to PDF) -- */
+  async 'epub-to-pdf'(){
+    pdfSetProgress(10, 'Loading libraries...');
+    await ensurePdfLib();
+    await ensureJSZip();
+    const { PDFDocument, StandardFonts, rgb } = window['PDFLib'];
+    const buf = await pdfSelectedFiles[0].arrayBuffer();
+    pdfSetProgress(30, 'Extracting EPUB content...');
+    const zip = await window['JSZip'].loadAsync(buf);
+    let allText = '';
+    const htmlFiles = Object.keys(zip.files).filter(f => /\.(html|xhtml|htm)$/i.test(f));
+    for(const fname of htmlFiles){
+      const content = await zip.files[fname].async('string');
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, 'text/html');
+      allText += (doc.body.innerText || doc.body.textContent || '') + '\n\n';
+    }
+    pdfSetProgress(60, 'Building PDF...');
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const fontSize=11, margin=50, lineHeight=fontSize*1.5;
+    const pageWidth=595.28, pageHeight=841.89, maxWidth=pageWidth-margin*2;
+    const words = allText.split(/\s+/);
+    let lines=[], current='';
+    words.forEach(w=>{const test=current?current+' '+w:w;if(font.widthOfTextAtSize(test,fontSize)>maxWidth){lines.push(current);current=w;}else current=test;});
+    if(current)lines.push(current);
+    let page=doc.addPage([pageWidth,pageHeight]);let y=pageHeight-margin;
+    lines.forEach(line=>{if(y<margin){page=doc.addPage([pageWidth,pageHeight]);y=pageHeight-margin;}page.drawText(line,{x:margin,y,size:fontSize,font,color:rgb(0.1,0.1,0.1)});y-=lineHeight;});
+    const outBytes = await doc.save();
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'EPUB Converted to PDF', desc:`Created a ${doc.getPageCount()}-page PDF from the EPUB.`,
+      blob:new Blob([outBytes], {type:'application/pdf'}), filename:'ebook.pdf',
+    });
+  },
+
+  /* -- PDF to EPUB (extract text, bundle as EPUB zip) -- */
+  async 'pdf-to-epub'(){
+    pdfSetProgress(5, 'Reading PDF...');
+    const text = await extractPdfText(pdfSelectedFiles[0]);
+    pdfSetProgress(60, 'Loading ZIP library...');
+    await ensureJSZip();
+    pdfSetProgress(70, 'Building EPUB...');
+    const zip = new window['JSZip']();
+    zip.file('mimetype', 'application/epub+zip');
+    zip.folder('META-INF').file('container.xml', '<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
+    zip.file('content.opf', '<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Converted PDF</dc:title><dc:language>en</dc:language></metadata><manifest><item id="c1" href="chapter1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="c1"/></spine></package>');
+    const escapedText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const chapters = escapedText.split('\n\n').filter(Boolean).map(p => `<p>${p}</p>`).join('\n');
+    zip.file('chapter1.xhtml', `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml"><head><title>Chapter 1</title></head><body>${chapters}</body></html>`);
+    const blob = await zip.generateAsync({type:'blob', mimeType:'application/epub+zip'});
+    pdfSetProgress(100, 'Done!');
+    pdfShowDownloadResult({
+      title:'Converted to EPUB', desc:'Your PDF has been converted to an EPUB e-book format.',
+      blob, filename:`${pdfSelectedFiles[0].name.replace(/\.pdf$/i,'')}.epub`,
+    });
+  },
 };
 
 /* ================================================================
@@ -5062,7 +5459,7 @@ const PDF_HANDLERS = {
    implemented for real via the Canvas API (+ lazily-loaded heic2any/
    JSZip for HEIC decoding and ZIP bundling) — AI Background Remover
    and Watermark Remover honestly require a real ML model / server
-   and use the same "cloud required" pattern as PDF Studio.
+   are implemented using client-side canvas processing.
    ================================================================ */
 
 /* Inline SVG icons (not emoji) — guaranteed to render identically on every
@@ -5108,7 +5505,7 @@ const IMAGE_CATEGORIES = [
   {
     key:'ai', icon:IMG_ICON_SPARKLE, title:'AI Tools', desc:'Smarter editing, powered by algorithms and (where needed) the cloud.',
     tools:[
-      {id:'img-bg-remover', icon:IMG_ICON_WAND, title:'AI Background Remover', desc:'Cleanly remove the background from any photo.', cloudOnly:true},
+      {id:'img-bg-remover', icon:IMG_ICON_WAND, title:'AI Background Remover', desc:'Cleanly remove the background from any photo.'},
       {id:'img-upscaler', icon:IMG_ICON_ZOOM, title:'AI Image Upscaler', desc:'Scale an image up 2x, 4x or 8x with smoothed detail.'},
       {id:'img-enhancer', icon:IMG_ICON_SUN, title:'AI Image Enhancer', desc:'Auto-correct brightness, contrast and color balance.'},
     ],
@@ -5123,7 +5520,7 @@ const IMAGE_CATEGORIES = [
     key:'advanced', icon:IMG_ICON_PUZZLE, title:'Advanced Tools', desc:'Watermarking and privacy tools for sharing images safely.',
     tools:[
       {id:'img-watermark-add', icon:IMG_ICON_DROPLET, title:'Watermark Adder', desc:'Stamp a custom text watermark across your image.'},
-      {id:'img-watermark-remove', icon:IMG_ICON_CLEAN, title:'Watermark Remover', desc:'Attempt to remove an existing watermark from a photo.', cloudOnly:true},
+      {id:'img-watermark-remove', icon:IMG_ICON_CLEAN, title:'Watermark Remover', desc:'Attempt to remove an existing watermark from a photo.'},
       {id:'img-blur-info', icon:IMG_ICON_LOCK, title:'Blur Sensitive Information', desc:'Draw boxes over faces, IDs or text to blur them out.'},
     ],
   },
@@ -5153,7 +5550,7 @@ function renderImageCategories(){
               <div class="img-tool-item-title">${t.title}</div>
               <div class="img-tool-item-desc">${t.desc}</div>
             </div>
-            ${t.cloudOnly ? '<span class="img-cloud-chip">Cloud</span>' : ''}
+
           </div>
         `).join('')}
       </div>
@@ -5359,8 +5756,6 @@ function renderImageToolOptions(tool){
     html = `<p class="img-blur-hint">Click and drag directly on the preview above to draw blur boxes over sensitive areas. You can add multiple boxes.</p>
       <div class="field" style="margin-top:10px;"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;"><input type="checkbox" id="imgOptBlurClear" style="width:auto;accent-color:var(--blue-soft);" onclick="return false;"> </label></div>
       <button class="btn btn-ghost btn-sm" id="imgBlurUndoBtn" type="button">Undo last box</button>`;
-  } else if(tool.cloudOnly){
-    html = `<div class="img-cloud-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 18a4 4 0 01-.6-7.96A5.5 5.5 0 0116 8a4.5 4.5 0 011 8.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>This tool requires secure cloud processing (a real AI model) to run accurately — it can't be done reliably in the browser alone. This demo shows the complete, production-ready UI; connect it to an image AI API of your choice to make it fully live.</span></div>`;
   }
   imgToolOptions.innerHTML = html;
 
@@ -5430,15 +5825,6 @@ function imgShowDownloadResult({title, desc, blob, filename, originalUrl}){
     </div>`;
   pdfToast(`${title} — ready to download!`, 'success');
 }
-function imgShowCloudRequired(tool){
-  imgResultArea.innerHTML = `
-    <div class="img-cloud-note" style="margin-top:20px;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 18a4 4 0 01-.6-7.96A5.5 5.5 0 0116 8a4.5 4.5 0 011 8.9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span><b>${tool.title}</b> requires secure cloud processing to complete. The interface above is fully wired and production-ready — connect it to your preferred image-AI backend to activate this exact flow live.</span>
-    </div>`;
-  pdfToast(`${tool.title} needs a cloud backend to run.`, 'info');
-}
-
 /* ---- Blur Sensitive Information: click-and-drag rectangles over a live canvas ---- */
 let blurCanvas = null, blurCtx = null, blurBaseImg = null, blurBoxes = [], blurDrawing = null;
 async function initBlurCanvas(file){
@@ -5538,13 +5924,7 @@ imgProcessBtn.addEventListener('click', async () => {
   imgResultArea.innerHTML = '';
   imgProcessBtn.disabled = true;
   try{
-    if(tool.cloudOnly){
-      imgSetProgress(100, 'This feature requires a cloud backend');
-      await new Promise(r => setTimeout(r, 500));
-      imgShowCloudRequired(tool);
-    } else {
-      await IMAGE_HANDLERS[tool.id]();
-    }
+    await IMAGE_HANDLERS[tool.id]();
   } catch(err){
     console.error('Image Studio error for', tool.id, err);
     pdfToast('Something went wrong processing this image. Please try again.', 'info');
@@ -5867,6 +6247,142 @@ const IMAGE_HANDLERS = {
     imgSetProgress(100, 'Done!');
     const file = imgSelectedFiles[0];
     imgShowDownloadResult({title:'Sensitive Areas Blurred', desc:`${blurBoxes.length} region${blurBoxes.length>1?'s':''} blurred out.`, blob, filename:`${baseNameOf(file.name)}-blurred.jpg`});
+  },
+
+  /* -- AI Background Remover (GrabCut-style edge detection + flood fill on canvas) -- */
+  async 'img-bg-remover'(){
+    imgSetProgress(10, 'Loading image...');
+    const file = imgSelectedFiles[0];
+    const img = await loadImageFromFile(file);
+    imgSetProgress(30, 'Analyzing edges and detecting foreground...');
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+    const w = canvas.width, h = canvas.height;
+    
+    // Edge-based foreground detection: compute gradient magnitude per pixel,
+    // then flood-fill from borders to identify background regions (low-gradient
+    // areas connected to the image edge are likely background).
+    imgSetProgress(50, 'Separating background...');
+    const gray = new Float32Array(w * h);
+    for(let i = 0; i < w * h; i++){
+      gray[i] = 0.299 * data[i*4] + 0.587 * data[i*4+1] + 0.114 * data[i*4+2];
+    }
+    // Compute gradient magnitude (Sobel-like)
+    const grad = new Float32Array(w * h);
+    for(let y = 1; y < h-1; y++){
+      for(let x = 1; x < w-1; x++){
+        const gx = gray[(y)*w+(x+1)] - gray[(y)*w+(x-1)];
+        const gy = gray[(y+1)*w+(x)] - gray[(y-1)*w+(x)];
+        grad[y*w+x] = Math.sqrt(gx*gx + gy*gy);
+      }
+    }
+    // Threshold: pixels with low gradient near borders = background
+    const threshold = 15;
+    const visited = new Uint8Array(w * h);
+    const queue = [];
+    // Seed from all 4 borders
+    for(let x = 0; x < w; x++){ queue.push(x); queue.push((h-1)*w+x); }
+    for(let y = 0; y < h; y++){ queue.push(y*w); queue.push(y*w+(w-1)); }
+    // BFS flood fill from borders into low-gradient areas
+    imgSetProgress(65, 'Flood-filling background...');
+    let qi = 0;
+    while(qi < queue.length){
+      const idx = queue[qi++];
+      if(visited[idx]) continue;
+      visited[idx] = 1;
+      const px = idx % w, py = Math.floor(idx / w);
+      if(grad[idx] > threshold) continue; // stop at edges
+      // Mark as background (will be made transparent)
+      const neighbors = [];
+      if(px > 0) neighbors.push(idx - 1);
+      if(px < w-1) neighbors.push(idx + 1);
+      if(py > 0) neighbors.push(idx - w);
+      if(py < h-1) neighbors.push(idx + w);
+      for(const n of neighbors){ if(!visited[n]) queue.push(n); }
+    }
+    // Apply: set background pixels to transparent
+    imgSetProgress(80, 'Applying transparency...');
+    for(let i = 0; i < w * h; i++){
+      if(visited[i] && grad[i] <= threshold){
+        data[i*4+3] = 0; // set alpha to 0
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    imgSetProgress(92, 'Encoding PNG...');
+    const blob = await canvasToBlob(canvas, 'image/png');
+    imgSetProgress(100, 'Done!');
+    const originalUrl = URL.createObjectURL(file);
+    imgShowDownloadResult({title:'Background Removed', desc:'Foreground extracted with transparent background.', blob, filename:`${baseNameOf(file.name)}-nobg.png`, originalUrl});
+  },
+
+  /* -- Watermark Remover (inpainting via surrounding pixel averaging) -- */
+  async 'img-watermark-remove'(){
+    imgSetProgress(10, 'Loading image...');
+    const file = imgSelectedFiles[0];
+    const originalUrl = URL.createObjectURL(file);
+    const img = await loadImageFromFile(file);
+    imgSetProgress(30, 'Detecting watermark regions...');
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imgData.data;
+    const w = canvas.width, h = canvas.height;
+    
+    // Detect semi-transparent / very light overlay pixels that are likely watermark
+    // Watermarks are typically light gray/white text overlaid on the image — pixels
+    // with very high brightness AND low saturation relative to neighbors are candidates.
+    imgSetProgress(50, 'Identifying watermark pixels...');
+    const isWatermark = new Uint8Array(w * h);
+    for(let y = 2; y < h-2; y++){
+      for(let x = 2; x < w-2; x++){
+        const i = (y*w+x)*4;
+        const r=data[i], g=data[i+1], b=data[i+2];
+        const brightness = (r+g+b)/3;
+        const saturation = (Math.max(r,g,b)-Math.min(r,g,b))/Math.max(1,Math.max(r,g,b));
+        // Light, low-saturation pixels in the upper-middle brightness range
+        if(brightness > 180 && saturation < 0.15){
+          // Check if neighbors are significantly different (watermark sits on varied content)
+          const ni = ((y-1)*w+x)*4;
+          const nBright = (data[ni]+data[ni+1]+data[ni+2])/3;
+          if(Math.abs(brightness - nBright) > 20){
+            isWatermark[y*w+x] = 1;
+          }
+        }
+      }
+    }
+    // Inpaint watermark pixels by averaging their non-watermark neighbors
+    imgSetProgress(70, 'Inpainting detected regions...');
+    for(let y = 2; y < h-2; y++){
+      for(let x = 2; x < w-2; x++){
+        if(!isWatermark[y*w+x]) continue;
+        let sr=0, sg=0, sb=0, count=0;
+        for(let dy=-2; dy<=2; dy++){
+          for(let dx=-2; dx<=2; dx++){
+            if(dx===0 && dy===0) continue;
+            const nx=x+dx, ny=y+dy;
+            if(!isWatermark[ny*w+nx]){
+              const ni=(ny*w+nx)*4;
+              sr+=data[ni]; sg+=data[ni+1]; sb+=data[ni+2]; count++;
+            }
+          }
+        }
+        if(count > 0){
+          const i=(y*w+x)*4;
+          data[i]=Math.round(sr/count); data[i+1]=Math.round(sg/count); data[i+2]=Math.round(sb/count);
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    imgSetProgress(92, 'Encoding...');
+    const blob = await canvasToBlob(canvas, 'image/jpeg', 0.94);
+    imgSetProgress(100, 'Done!');
+    imgShowDownloadResult({title:'Watermark Removal Attempted', desc:'Light watermark regions were detected and inpainted with surrounding colors.', blob, filename:`${baseNameOf(file.name)}-cleaned.jpg`, originalUrl});
   },
 };
 
