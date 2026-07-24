@@ -388,7 +388,7 @@ header#navbar.scrolled{
 .nav-links a:hover{color:var(--text);background:var(--glass);backdrop-filter:var(--glass-blur-1);-webkit-backdrop-filter:var(--glass-blur-1);}
 .nav-links a.active-link{color:var(--text);background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;}
 .nav-slider{
-  position:absolute;bottom:3px;height:2px;width:24px;border-radius:2px;
+  position:absolute;bottom:3px;height:2px;width:24px !important;max-width:24px;min-width:24px;border-radius:2px;
   background:var(--grad);
   transition:left .4s var(--ease);
   pointer-events:none;
@@ -6470,25 +6470,34 @@ function updateActiveSection(){
   navCurrentLabel.textContent = label;
   navCurrentLabelMobile.textContent = label;
   $$('#navLinks a').forEach(a => a.classList.toggle('active-link', a.getAttribute('href') === '#' + current.id));
-  moveNavSlider();
+  moveNavSlider(false);
 }
 
 /* ---- Smooth sliding bar under the active nav link ---- */
 const navSlider = $('#navSlider');
-function moveNavSlider(){
+let navSliderScrolling = false;
+function moveNavSlider(instant){
   const activeLink = $('.nav-links a.active-link');
   if(!activeLink || !navSlider) return;
   const nav = $('#navLinks');
   const navRect = nav.getBoundingClientRect();
   const linkRect = activeLink.getBoundingClientRect();
   const left = linkRect.left - navRect.left + (linkRect.width - 24) / 2;
-  navSlider.style.left = left + 'px';
-  navSlider.style.width = '24px';
+  if(instant){
+    navSlider.style.transition = 'none';
+    navSlider.style.left = left + 'px';
+    navSlider.style.width = '24px';
+    navSlider.offsetHeight; // force reflow
+    navSlider.style.transition = '';
+  } else {
+    navSlider.style.left = left + 'px';
+    navSlider.style.width = '24px';
+  }
 }
 // Initial position (no transition on first load)
-setTimeout(() => { navSlider.style.transition = 'none'; moveNavSlider(); requestAnimationFrame(() => navSlider.style.transition = ''); }, 100);
-window.addEventListener('resize', moveNavSlider);
-window.addEventListener('scroll', moveNavSlider, {passive:true});
+setTimeout(() => { moveNavSlider(true); }, 100);
+window.addEventListener('resize', () => moveNavSlider(true));
+window.addEventListener('scroll', () => moveNavSlider(true), {passive:true});
 
 function positionMobilePill(){
   const h = navbar.getBoundingClientRect().height;
