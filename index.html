@@ -1922,17 +1922,7 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
 <!-- ============================================================
      FUTURE FEATURES SECTION
      ============================================================ -->
-<div class="section-glow-divider" aria-hidden="true"></div>
-<section class="section-tight section-top-tight" id="future">
-  <div class="container">
-    <div class="section-head reveal">
-      <div class="eyebrow">Coming Soon</div>
-      <h2>What's <span class="gradient-text">next</span> for StudentOS AI</h2>
-      <p>We're building the future of student productivity. Here's a glimpse.</p>
-    </div>
-    <div class="grid grid-cols" id="futureGrid"></div>
-  </div>
-</section>
+
 
 <!-- ============================================================
      ABOUT SECTION
@@ -2027,7 +2017,6 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
           <li><a href="#about" style="color:var(--text-dim);">About</a></li>
           <li><a href="#creator" style="color:var(--text-dim);">Creator</a></li>
           <li><a href="#contact" style="color:var(--text-dim);">Contact</a></li>
-          <li><a href="#future" style="color:var(--text-dim);">Future Updates</a></li>
         </ul>
       </div>
       <div>
@@ -2178,17 +2167,6 @@ const ENGINEERING_TOOLS = [
   {id:'unit-converter', icon:'📐', title:'Unit Converter', desc:'Convert length, mass, temperature, time and data units.'},
 ];
 
-const FUTURE_FEATURES = [
-  {icon:'👤', title:'User Accounts', desc:'Save your data securely across devices with a personal account.'},
-  {icon:'💬', title:'AI Chatbot', desc:'A conversational AI assistant embedded across the whole platform.'},
-  {icon:'⭐', title:'Premium Membership', desc:'Unlock advanced AI features and unlimited generations.'},
-  {icon:'🌍', title:'Community Features', desc:'Connect with other students, share notes and study together.'},
-  {icon:'📱', title:'Mobile App', desc:'A native app experience for iOS and Android.'},
-  {icon:'🧩', title:'Browser Extension', desc:'Quick access to StudentOS AI tools from any tab.'},
-  {icon:'☁️', title:'Notes Sync', desc:'Automatically sync notes and flashcards across all your devices.'},
-  {icon:'🗄️', title:'Cloud Storage', desc:'Store documents and study material securely in the cloud.'},
-];
-
 /* Master search index combining every tool across every section */
 const SEARCH_INDEX = [
   ...STUDY_TOOLS.map(t => ({...t, cat:'Study', anchor:'study'})),
@@ -2217,26 +2195,8 @@ function renderToolCards(list, containerId, opts={}){
   });
 }
 
-function renderFutureCards(){
-  const container = $('#futureGrid');
-  container.innerHTML = '';
-  FUTURE_FEATURES.forEach((item,i) => {
-    const card = el('div', 'tool-card glass reveal');
-    card.style.transitionDelay = (i % 6) * 0.05 + 's';
-    card.style.cursor = 'default';
-    card.innerHTML = `
-      <div class="tool-icon">${item.icon}</div>
-      <h3>${item.title}</h3>
-      <p>${item.desc}</p>
-      <span class="tag" style="position:relative;z-index:1;margin-top:14px;">Coming Soon</span>
-    `;
-    container.appendChild(card);
-  });
-}
-
 renderToolCards(STUDY_TOOLS, '#studyGrid');
 renderToolCards(ENGINEERING_TOOLS, '#engineeringGrid');
-renderFutureCards();
 
 /* ---------------------------------------------------------------
    4. GLOBAL SEARCH SYSTEM
@@ -5974,7 +5934,7 @@ window.addEventListener('scroll', () => {
    are reordered. */
 const SECTION_LABELS = {
   'home':'Home', 'image-studio':'Image Studio', 'pdf-studio':'PDF Studio', 'study':'Study', 'engineering':'Engineering',
-  'legal-ai':'Legal AI', 'mediai':'MediAI', 'roadmap':'Roadmap', 'future':'Future', 'about':'About', 'creator':'Creator', 'contact':'Contact',
+  'legal-ai':'Legal AI', 'mediai':'MediAI', 'roadmap':'Roadmap', 'about':'About', 'creator':'Creator', 'contact':'Contact',
 };
 const spySections = Object.keys(SECTION_LABELS).map(id => document.getElementById(id)).filter(Boolean);
 const navCurrentLabel = $('#navCurrentLabel');
