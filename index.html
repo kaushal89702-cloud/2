@@ -358,19 +358,12 @@ header#navbar{
   padding:16px 0;
   background:rgba(10,12,22,0.32);
   backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
-  border-bottom:none;
-  transition:background .4s var(--ease), padding .4s var(--ease);
+  border-bottom:1px solid var(--glass-border);
+  transition:background .4s var(--ease), border-color .4s var(--ease), padding .4s var(--ease);
 }
-header#navbar::after{
-  content:'';position:absolute;left:10%;right:10%;bottom:-8px;height:16px;
-  background:radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, transparent 70%);
-  filter:blur(4px);
-  pointer-events:none;
-}
-header#navbar.scrolled::after{background:radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, transparent 70%);}
 header#navbar.scrolled{
   background:rgba(10,12,22,0.6);
-  padding:11px 0;
+  border-bottom:1px solid var(--glass-border-strong);padding:11px 0;
   box-shadow:var(--glass-shadow-1);
 }
 /* The navbar keeps its own wider, fixed max-width (independent of the
