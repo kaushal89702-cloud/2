@@ -6483,10 +6483,12 @@ function moveNavSlider(){
   const linkRect = activeLink.getBoundingClientRect();
   const left = linkRect.left - navRect.left + (linkRect.width - 24) / 2;
   navSlider.style.left = left + 'px';
+  navSlider.style.width = '24px';
 }
 // Initial position (no transition on first load)
 setTimeout(() => { navSlider.style.transition = 'none'; moveNavSlider(); requestAnimationFrame(() => navSlider.style.transition = ''); }, 100);
 window.addEventListener('resize', moveNavSlider);
+window.addEventListener('scroll', moveNavSlider, {passive:true});
 
 function positionMobilePill(){
   const h = navbar.getBoundingClientRect().height;
