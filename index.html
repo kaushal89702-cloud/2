@@ -176,6 +176,16 @@ ul{list-style:none;}
 ::-webkit-scrollbar-thumb:hover{background:linear-gradient(135deg, var(--blue-soft), var(--purple-soft));}
 html{scrollbar-width:auto;scrollbar-color:var(--blue) rgba(10,12,22,0.5);}
 
+/* Scroll progress sidebar — fixed vertical bar on the right edge */
+.scroll-progress-bar{
+  position:fixed;top:0;right:0;width:4px;height:100vh;z-index:9998;pointer-events:none;
+  background:rgba(255,255,255,0.04);
+}
+.scroll-progress-fill{
+  width:100%;height:0%;background:var(--grad);border-radius:0 0 4px 4px;
+  transition:height .1s linear;
+}
+
 /* Focus visibility for accessibility, kept subtle */
 :focus-visible{outline:2px solid var(--blue-soft);outline-offset:2px;}
 
@@ -1509,6 +1519,9 @@ table.calc-table th{color:var(--text-dim);font-weight:600;font-size:12px;text-tr
   <div class="loader-logo"><span class="gradient-text">StudentOS AI</span></div>
   <div class="loader-bar"></div>
 </div>
+
+<!-- Scroll progress sidebar -->
+<div class="scroll-progress-bar"><div class="scroll-progress-fill" id="scrollProgressFill"></div></div>
 
 <!-- ============================================================
      ANIMATED BACKGROUND (fixed, behind all content)
@@ -6412,8 +6425,12 @@ window.addEventListener('load', () => {
 
 /* -- Sticky navbar background on scroll -- */
 const navbar = $('#navbar');
+const scrollProgressFill = $('#scrollProgressFill');
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 30);
+  const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
+  if(scrollProgressFill) scrollProgressFill.style.height = pct + '%';
 }, {passive:true});
 
 /* -- "Which section am I on" scroll-spy indicator --
