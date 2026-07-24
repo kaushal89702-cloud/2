@@ -362,11 +362,12 @@ header#navbar{
   transition:background .4s var(--ease), padding .4s var(--ease);
 }
 header#navbar::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:1px;
-  background:linear-gradient(90deg, transparent, var(--glass-border-strong) 30%, var(--glass-border-strong) 70%, transparent);
-  opacity:0.6;transition:opacity .4s var(--ease);
+  content:'';position:absolute;left:10%;right:10%;bottom:-8px;height:16px;
+  background:radial-gradient(ellipse at center, rgba(255,255,255,0.04) 0%, transparent 70%);
+  filter:blur(4px);
+  pointer-events:none;
 }
-header#navbar.scrolled::after{opacity:1;}
+header#navbar.scrolled::after{background:radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, transparent 70%);}
 header#navbar.scrolled{
   background:rgba(10,12,22,0.6);
   padding:11px 0;
